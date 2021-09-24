@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:neumorphic_container/neumorphic_container.dart';
 
-class Dashboard extends StatefulWidget {
-  Dashboard({Key? key}) : super(key: key);
+class DashboardReg extends StatefulWidget {
+  DashboardReg({Key? key}) : super(key: key);
 
   @override
-  _DashboardState createState() => _DashboardState();
+  _DashboardRegState createState() => _DashboardRegState();
 }
 
-class _DashboardState extends State<Dashboard> {
+class _DashboardRegState extends State<DashboardReg> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,11 +21,11 @@ class _DashboardState extends State<Dashboard> {
               children: [
                 Text(
                   ("Aditya's").toUpperCase(),
-                  style: TextStyle(letterSpacing: 4),
+                  style: const TextStyle(letterSpacing: 4),
                 ),
                 Text(
                   ("Honda City").toUpperCase(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     letterSpacing: 4,
                   ),
@@ -37,64 +37,94 @@ class _DashboardState extends State<Dashboard> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               children: [
-                NeumorphicContainer(
+                Container(
                   height: 100,
                   width: double.infinity,
-                  depth: 30,
-                  spread: 4,
-                  borderRadius: 10,
-                  primaryColor: Color.fromARGB(255, 216, 224, 245),
-                  //concave neumorphism design
-                  curvature: Curvature.flat,
-                  child: Center(child: Text("//Pollution Pie")),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 216, 224, 245),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        offset: const Offset(1, 2),
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 3,
+                      ),
+                      BoxShadow(
+                        offset: const Offset(1, 2),
+                        color: Colors.black87.withOpacity(0.3),
+                        blurRadius: 6,
+                      ),
+                      const BoxShadow(
+                        offset: Offset(-1, -2),
+                        color: Colors.white,
+                        blurRadius: 5,
+                      ),
+                    ],
+                  ),
+                  child: const Center(child: Text("//Pollution Pie")),
                 ),
-                SizedBox(height: 30),
-                NeumorphicContainer(
-                  spread: 4,
-                  depth: 30,
+                const SizedBox(height: 30),
+                Container(
                   height: 240,
                   width: double.infinity,
-                  borderRadius: 10,
-                  primaryColor: Color.fromARGB(255, 251, 219, 221),
-                  //concave neumorphism design
-                  curvature: Curvature.flat,
-                  child: Center(
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 251, 219, 221),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        offset: const Offset(1, 2),
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 3,
+                      ),
+                      BoxShadow(
+                        offset: const Offset(1, 2),
+                        color: Colors.black87.withOpacity(0.3),
+                        blurRadius: 6,
+                      ),
+                      const BoxShadow(
+                        offset: Offset(-1, -2),
+                        color: Colors.white,
+                        blurRadius: 5,
+                      ),
+                    ],
+                  ),
+                  child: const Center(
                       child: Text(
                     "//Daily",
                     style: TextStyle(color: Color.fromRGBO(164, 43, 20, 1)),
                   )),
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 Row(
                   children: [
                     NeumorphicContainer(
                       spread: 2,
-                      depth: 60,
+                      depth: 40,
                       height: 240,
                       width: 170,
                       borderRadius: 10,
-                      primaryColor: Color.fromARGB(255, 254, 243, 244),
+                      primaryColor: const Color.fromARGB(255, 254, 243, 244),
                       //concave neumorphism design
                       curvature: Curvature.flat,
-                      child: Center(
+                      child: const Center(
                           child: Text(
                         "//Weekly",
                         style: TextStyle(color: Color.fromRGBO(164, 43, 20, 1)),
                       )),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 30,
                     ),
                     NeumorphicContainer(
                       spread: 2,
-                      depth: 60,
+                      depth: 40,
                       height: 240,
                       width: 170,
                       borderRadius: 10,
-                      primaryColor: Color.fromARGB(255, 254, 243, 244),
+                      primaryColor: const Color.fromARGB(255, 254, 243, 244),
                       //concave neumorphism design
                       curvature: Curvature.flat,
-                      child: Center(
+                      child: const Center(
                           child: Text(
                         "//Monthly",
                         style: TextStyle(color: Color.fromRGBO(164, 43, 20, 1)),
@@ -102,19 +132,19 @@ class _DashboardState extends State<Dashboard> {
                     ),
                   ],
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 30,
                 ),
                 NeumorphicContainer(
-                  spread: 3,
-                  depth: 40,
+                  spread: 2,
+                  depth: 60,
                   height: 100,
                   width: double.infinity,
                   borderRadius: 10,
-                  primaryColor: Color.fromARGB(255, 161, 182, 239),
+                  primaryColor: const Color.fromARGB(255, 161, 182, 239),
                   //concave neumorphism design
                   curvature: Curvature.flat,
-                  child: Center(
+                  child: const Center(
                       child: Text(
                     "//Track mode",
                     style: TextStyle(color: Color.fromRGBO(164, 43, 20, 1)),
