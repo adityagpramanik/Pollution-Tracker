@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neumorphic_container/neumorphic_container.dart';
 import 'package:lite_rolling_switch/lite_rolling_switch.dart';
+import 'package:ptracker/daily.dart';
 
 class Dashboard extends StatefulWidget {
   Dashboard({Key? key}) : super(key: key);
@@ -21,13 +22,15 @@ class _DashboardState extends State<Dashboard> {
             child: Row(
               children: [
                 Text(
-                  ("Aditya's").toUpperCase(),
-                  style: const TextStyle(letterSpacing: 4),
+                  ("Aditya's ").toUpperCase(),
+                  style: const TextStyle(
+                    letterSpacing: 4,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 Text(
                   ("Honda City").toUpperCase(),
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
                     letterSpacing: 4,
                   ),
                 )
@@ -65,35 +68,41 @@ class _DashboardState extends State<Dashboard> {
                   child: const Center(child: Text("//Pollution Pie")),
                 ),
                 const SizedBox(height: 30),
-                Container(
-                  height: 240,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 251, 219, 221),
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        offset: const Offset(1, 2),
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 3,
-                      ),
-                      BoxShadow(
-                        offset: const Offset(1, 2),
-                        color: Colors.black87.withOpacity(0.3),
-                        blurRadius: 6,
-                      ),
-                      const BoxShadow(
-                        offset: Offset(-1, -2),
-                        color: Colors.white,
-                        blurRadius: 5,
-                      ),
-                    ],
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => DailyChart()));
+                  },
+                  child: Container(
+                    height: 240,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 251, 219, 221),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          offset: const Offset(1, 2),
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 3,
+                        ),
+                        BoxShadow(
+                          offset: const Offset(1, 2),
+                          color: Colors.black87.withOpacity(0.3),
+                          blurRadius: 6,
+                        ),
+                        const BoxShadow(
+                          offset: Offset(-1, -2),
+                          color: Colors.white,
+                          blurRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                        child: Text(
+                      "//Daily",
+                      style: TextStyle(color: Color.fromRGBO(164, 43, 20, 1)),
+                    )),
                   ),
-                  child: const Center(
-                      child: Text(
-                    "//Daily",
-                    style: TextStyle(color: Color.fromRGBO(164, 43, 20, 1)),
-                  )),
                 ),
                 const SizedBox(height: 30),
                 Row(
@@ -168,14 +177,14 @@ class _DashboardState extends State<Dashboard> {
                           // ]
                         ),
                         child: LiteRollingSwitch(
-                          value: true,
-                          textOn: 'Start',
-                          textOff: 'Stop',
+                          value: false,
+                          textOn: 'Stop',
+                          textOff: 'Start',
                           textSize: 18,
-                          colorOn: Colors.indigo[300],
-                          colorOff: Colors.blueGrey,
-                          iconOn: Icons.bolt,
-                          iconOff: Icons.power_settings_new,
+                          colorOff: Colors.indigo[300],
+                          colorOn: Colors.blueGrey,
+                          iconOff: Icons.bolt,
+                          iconOn: Icons.power_settings_new,
                           onChanged: (bool state) {
                             // ignore: avoid_print
                             print('turned ${(state) ? 'on' : 'off'}');
