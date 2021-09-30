@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ptracker/concaveDeco.dart';
 import 'package:ptracker/dashboard.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -15,7 +14,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final fkey = GlobalKey<FormState>();
 
-  List<String> VehicleType = ["Car", "Bike"];
+  List<String> vehicleType = ["Car", "Bike"];
   String vType = "";
 
   TextEditingController name = TextEditingController();
@@ -44,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         borderRadius: BorderRadius.circular(20),
                         color: Colors.white,
                         boxShadow: [
-                          BoxShadow(
+                          const BoxShadow(
                               color: Colors.black,
                               offset: Offset(0, -5),
                               spreadRadius: 0,
@@ -54,29 +53,30 @@ class _MyHomePageState extends State<MyHomePage> {
                       controller: name,
                       textInputAction: TextInputAction.next,
                       keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                           label: Text("Name"),
                           hintText: "Ajay Rathod",
                           border: InputBorder.none),
                       validator: (value) {
-                        if (value!.isEmpty)
+                        if (value!.isEmpty) {
                           return "Can't be empty";
-                        else if (!(value.contains(RegExp('[a-zA-Z]'))) ||
-                            (value.contains(RegExp('[0-9]'))))
+                        } else if (!(value.contains(RegExp('[a-zA-Z]'))) ||
+                            (value.contains(RegExp('[0-9]')))) {
                           return "Please enter a valid name";
+                        }
                         return null;
                       },
                     ),
                   ),
                   vertDiff,
-                  Text("Vehicle Type?"),
+                  const Text("Vehicle Type?"),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
                         children: [
                           Radio<String>(
-                            value: VehicleType[0],
+                            value: vehicleType[0],
                             groupValue: vType,
                             toggleable: true,
                             onChanged: (value) {
@@ -91,7 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Row(
                         children: [
                           Radio<String>(
-                            value: VehicleType[1],
+                            value: vehicleType[1],
                             groupValue: vType,
                             onChanged: (value) {
                               setState(() {
@@ -156,10 +156,10 @@ class _MyHomePageState extends State<MyHomePage> {
               TextButton(
                   onPressed: () {
                     // if (fkey.currentState!.validate()) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (BuildContext) => Dashboard()));
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (BuildContext) => Dashboard()));
                     // }
                   },
                   child: Text("Proceed")),
