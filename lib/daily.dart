@@ -2,7 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class DailyChart extends StatefulWidget {
-  // DailyChart({Key key}) : super(key: key);
+  bool mode;
+  DailyChart({Key? key, required this.mode}) : super(key: key);
 
   @override
   _DailyChartState createState() => _DailyChartState();
@@ -11,6 +12,8 @@ class DailyChart extends StatefulWidget {
 class _DailyChartState extends State<DailyChart> {
   @override
   Widget build(BuildContext context) {
+    bool _mode = widget.mode;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -34,7 +37,7 @@ class _DailyChartState extends State<DailyChart> {
           child: Padding(
             padding: const EdgeInsets.only(right: 30, left: 6.0),
             child: DailyChartData(
-              a: 2.5,
+              a: _mode ? 2.5 : 3.1,
               b: 4.5,
               c: 1.5,
             ),
@@ -55,15 +58,46 @@ class DailyChartData extends StatefulWidget {
       : super(key: key);
 
   @override
-  _DailyChartDataState createState() => _DailyChartDataState();
+  _DailyChartDataState createState() => _DailyChartDataState(a, b, c);
 }
 
 class _DailyChartDataState extends State<DailyChartData> {
+  double valueA, valueB, valueC;
+  _DailyChartDataState(this.valueA, this.valueB, this.valueC);
+
+  final List<int> indexes = [2, 4, 6];
+  late List<FlSpot> spots;
+  late List<LineChartBarData> lineChartBDlist;
+
   @override
   Widget build(BuildContext context) {
-    double valueA = widget.a;
-    double valueB = widget.b;
-    double valueC = widget.c;
+    spots = [
+      FlSpot(indexes[0].toDouble(), 2.5),
+      FlSpot(indexes[1].toDouble(), 4.3),
+      FlSpot(indexes[2].toDouble(), 1.8),
+    ];
+    lineChartBDlist = [
+      LineChartBarData(
+        show: true,
+        showingIndicators: indexes,
+        isCurved: true,
+        colors: const [Color(0xffA52B14)],
+        barWidth: 5,
+        isStrokeCapRound: true,
+        dotData: FlDotData(
+          show: true,
+          getDotPainter: (spot, percent, bardata, index) {
+            return FlDotCirclePainter(
+              radius: 10,
+              color: const Color.fromRGBO(165, 43, 20, 0.7),
+              strokeWidth: 0,
+              // strokeColor: Colors.deepOrange,
+            );
+          },
+        ),
+        spots: spots,
+      )
+    ];
 
     return LineChart(
       chartData(valueA, valueB, valueC),
@@ -73,11 +107,22 @@ class _DailyChartDataState extends State<DailyChartData> {
 
   LineChartData chartData(double a, double b, double c) {
     return LineChartData(
+      showingTooltipIndicators: [
+        ShowingTooltipIndicators([
+          LineBarSpot(lineChartBDlist[0], 0, lineChartBDlist[0].spots[0]),
+        ]),
+        ShowingTooltipIndicators([
+          LineBarSpot(lineChartBDlist[0], 0, lineChartBDlist[0].spots[1]),
+        ]),
+        ShowingTooltipIndicators([
+          LineBarSpot(lineChartBDlist[0], 0, lineChartBDlist[0].spots[2]),
+        ]),
+      ],
       lineTouchData: lineTouchData,
       gridData: gridData,
       titlesData: titleData,
       borderData: borderData,
-      lineBarsData: lineBarsData(a, b, c),
+      lineBarsData: lineChartBDlist,
       minX: 0,
       maxX: 8,
       maxY: 5,
@@ -86,10 +131,30 @@ class _DailyChartDataState extends State<DailyChartData> {
   }
 
   LineTouchData get lineTouchData => LineTouchData(
+        enabled: true,
         handleBuiltInTouches: true,
+        getTouchedSpotIndicator:
+            (LineChartBarData barData, List<int> spotIndexes) {
+          return spotIndexes.map((index) {
+            return TouchedSpotIndicatorData(
+                FlLine(
+                  strokeWidth: 0,
+                ),
+                FlDotData(show: false));
+          }).toList();
+        },
         touchTooltipData: LineTouchTooltipData(
-          tooltipBgColor: Colors.blueGrey.withOpacity(0.2),
-          showOnTopOfTheChartBoxArea: true,
+          tooltipMargin: 4,
+          tooltipBgColor: Colors.transparent,
+          getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
+            return lineBarsSpot.map((lineBarSpot) {
+              return LineTooltipItem(
+                lineBarSpot.y.toString() + '%',
+                const TextStyle(
+                    color: Color(0xff632013), fontWeight: FontWeight.bold),
+              );
+            }).toList();
+          },
         ),
       );
 
@@ -105,7 +170,7 @@ class _DailyChartDataState extends State<DailyChartData> {
             return FlLine(
               strokeWidth: 1,
               dashArray: [2, 4],
-              color: Color(0x997744c9),
+              color: const Color(0x997744c9),
             );
           } else {
             return FlLine(strokeWidth: 0);
@@ -186,36 +251,4 @@ class _DailyChartDataState extends State<DailyChartData> {
           ),
         ),
       );
-
-  List<LineChartBarData> lineBarsData(double a, double b, double c) {
-    return [
-      lineBarData(a, b, c),
-    ];
-  }
-
-  LineChartBarData lineBarData(double a, double b, double c) {
-    return LineChartBarData(
-      show: true,
-      isCurved: true,
-      colors: const [Color(0xffA52B14)],
-      barWidth: 5,
-      isStrokeCapRound: true,
-      dotData: FlDotData(
-        show: true,
-        getDotPainter: (spot, percent, bardata, index) {
-          return FlDotCirclePainter(
-            radius: 10,
-            color: const Color.fromRGBO(165, 43, 20, 0.7),
-            strokeWidth: 0,
-            // strokeColor: Colors.deepOrange,
-          );
-        },
-      ),
-      spots: [
-        FlSpot(2, a),
-        FlSpot(4, b),
-        FlSpot(6, c),
-      ],
-    );
-  }
 }

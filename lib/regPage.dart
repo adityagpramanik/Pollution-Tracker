@@ -1,5 +1,8 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:neumorphic_container/neumorphic_container.dart';
 import 'package:ptracker/dashboard.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -36,36 +39,38 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Colors.white,
-                        boxShadow: [
-                          const BoxShadow(
-                              color: Colors.black,
-                              offset: Offset(0, -5),
-                              spreadRadius: 0,
-                              blurRadius: 10),
-                        ]),
-                    child: TextFormField(
-                      controller: name,
-                      textInputAction: TextInputAction.next,
-                      keyboardType: TextInputType.text,
-                      decoration: const InputDecoration(
-                          label: Text("Name"),
-                          hintText: "Ajay Rathod",
-                          border: InputBorder.none),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return "Can't be empty";
-                        } else if (!(value.contains(RegExp('[a-zA-Z]'))) ||
-                            (value.contains(RegExp('[0-9]')))) {
-                          return "Please enter a valid name";
-                        }
-                        return null;
-                      },
+                  NeumorphicContainer(
+                    borderRadius: 10,
+                    depth: 60,
+                    spread: 0,
+                    borderColor: Colors.black26,
+                    primaryColor: Colors.indigo[100],
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: TextFormField(
+                        controller: name,
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                            label: Text(
+                              "Name",
+                              style: TextStyle(
+                                color: Colors.indigo[900],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            hintText: "Ajay Rathod",
+                            border: InputBorder.none),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return "Can't be empty";
+                          } else if (!(value.contains(RegExp('[a-zA-Z]'))) ||
+                              (value.contains(RegExp('[0-9]')))) {
+                            return "Please enter a valid name";
+                          }
+                          return null;
+                        },
+                      ),
                     ),
                   ),
                   vertDiff,
@@ -79,6 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             value: vehicleType[0],
                             groupValue: vType,
                             toggleable: true,
+                            activeColor: Colors.indigo[900],
                             onChanged: (value) {
                               setState(() {
                                 vType = value!;
@@ -93,6 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           Radio<String>(
                             value: vehicleType[1],
                             groupValue: vType,
+                            activeColor: Colors.indigo[900],
                             onChanged: (value) {
                               setState(() {
                                 vType = value!;
@@ -104,65 +111,125 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ],
                   ),
-                  TextFormField(
-                    decoration: InputDecoration(
-                        label: Text("Company"),
-                        hintText: "Honda",
-                        border: InputBorder.none),
-                    controller: company,
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.text,
-                    validator: (value) {
-                      if (value!.isEmpty)
-                        return "Can't be empty";
-                      else if (!(value.contains(RegExp('[a-zA-Z]'))) ||
-                          (value.contains(RegExp('[0-9]'))))
-                        return "Please enter a valid company";
-                      return null;
-                    },
-                  ),
-                  vertDiff,
-                  TextFormField(
-                    decoration: InputDecoration(
-                        label: Text("Model"),
-                        hintText: "Amaze - S MT Petrol",
-                        border: InputBorder.none),
-                    controller: model,
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.text,
-                    validator: (value) {
-                      if (value!.isEmpty) return "Can't be empty";
-                      return null;
-                    },
-                  ),
-                  vertDiff,
-                  TextFormField(
-                    decoration: InputDecoration(
-                      label: Text("Mileage (in km/l)"),
-                      hintText: "23",
-                      border: InputBorder.none,
+                  NeumorphicContainer(
+                    borderRadius: 10,
+                    depth: 60,
+                    spread: 0,
+                    borderColor: Colors.black26,
+                    primaryColor: Colors.indigo[100],
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                            label: Text(
+                              "Company",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.indigo[900],
+                              ),
+                            ),
+                            hintText: "Honda",
+                            border: InputBorder.none),
+                        controller: company,
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.text,
+                        validator: (value) {
+                          if (value!.isEmpty)
+                            return "Can't be empty";
+                          else if (!(value.contains(RegExp('[a-zA-Z]'))) ||
+                              (value.contains(RegExp('[0-9]'))))
+                            return "Please enter a valid company";
+                          return null;
+                        },
+                      ),
                     ),
-                    controller: mileage,
-                    textInputAction: TextInputAction.go,
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value!.isEmpty) return "Can't be empty";
-                      return null;
-                    },
+                  ),
+                  vertDiff,
+                  NeumorphicContainer(
+                    borderRadius: 10,
+                    depth: 60,
+                    spread: 0,
+                    borderColor: Colors.black26,
+                    primaryColor: Colors.indigo[100],
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                            label: Text(
+                              "Model",
+                              style: TextStyle(
+                                color: Colors.indigo[900],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            hintText: "Amaze - S MT Petrol",
+                            border: InputBorder.none),
+                        controller: model,
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.text,
+                        validator: (value) {
+                          if (value!.isEmpty) return "Can't be empty";
+                          return null;
+                        },
+                      ),
+                    ),
+                  ),
+                  vertDiff,
+                  NeumorphicContainer(
+                    borderRadius: 10,
+                    depth: 60,
+                    spread: 0,
+                    borderColor: Colors.black26,
+                    primaryColor: Colors.indigo[100],
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          label: Text(
+                            "Mileage (in km/l)",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color: Colors.indigo[900],
+                            ),
+                          ),
+                          hintText: "23",
+                          border: InputBorder.none,
+                        ),
+                        controller: mileage,
+                        textInputAction: TextInputAction.go,
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value!.isEmpty) return "Can't be empty";
+                          return null;
+                        },
+                      ),
+                    ),
                   ),
                 ],
               ),
               vertDiff,
-              TextButton(
-                  onPressed: () {
-                    // if (fkey.currentState!.validate()) {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (BuildContext) => Dashboard()));
-                    // }
-                  },
-                  child: Text("Proceed")),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  elevation: 2,
+                  primary: Colors.indigo[200],
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: () {
+                  // if (fkey.currentState!.validate()) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Dashboard(
+                                mode: false,
+                              )));
+                  // }
+                },
+                child: Text(
+                  "Proceed",
+                  style: TextStyle(color: Colors.indigo[900]),
+                ),
+              ),
             ],
           ),
         ),
