@@ -1,12 +1,15 @@
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
 import 'dart:async';
-import 'dart:ui';
+import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:neumorphic_container/neumorphic_container.dart';
+import 'package:ptracker/pollution.dart';
+import 'package:ptracker/utils/SharedPref.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
 class Dashboard extends StatefulWidget {
@@ -22,7 +25,27 @@ class _DashboardState extends State<Dashboard> {
   _DashboardState(this.superMode);
 
   StreamSubscription s = accelerometerEvents.listen((event) {});
+  GeolocatorPlatform position = GeolocatorPlatform.instance;
   double a = 0;
+  String? name, company, model;
+
+  void setData() async {
+    var getName = await SharedPref.getName();
+    var getCompany = await SharedPref.getComp();
+    var getModel = await SharedPref.getModel();
+
+    setState(() async {
+      name = getName!.split(" ")[0];
+      company = getCompany;
+      model = getModel;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,14 +62,14 @@ class _DashboardState extends State<Dashboard> {
               child: Row(
                 children: [
                   Text(
-                    ("Aditya's ").toUpperCase(),
+                    ("$name's ").toUpperCase(),
                     style: const TextStyle(
                       letterSpacing: 4,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   Text(
-                    ("Honda City").toUpperCase(),
+                    ("$company $model").toUpperCase(),
                     style: const TextStyle(
                       letterSpacing: 4,
                     ),
@@ -82,7 +105,11 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ],
                     ),
-                    child: const Center(child: Text("//Pollution Pie")),
+                    child: Center(
+                        child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Pollution(),
+                    )),
                   ),
                   const SizedBox(height: 30),
                   AspectRatio(
@@ -157,7 +184,7 @@ class _DashboardState extends State<Dashboard> {
                         curvature: Curvature.flat,
                         child: Center(
                             child: Text(
-                          superMode.toString(),
+                          superMode.toString() + ': ' + a.toString(),
                           // _mode ? "//Monthly" : "something else",
                           style:
                               TextStyle(color: Color.fromRGBO(164, 43, 20, 1)),
@@ -224,23 +251,49 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void change(bool val) {
+  void change(bool val) async {
+    // var dtor = pi / 180;
+    var geoLoc = await position.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.bestForNavigation);
+    var lati = geoLoc.latitude;
+    var longi = geoLoc.longitude;
+
     setState(() {
       superMode = val;
-      // if (val) {
-      //   s = accelerometerEvents.listen((event) {
-      //     a += event.x;
+      if (val) {
+        s = accelerometerEvents.listen((event) async {
+          var time = DateTime.now();
+          geoLoc = await position.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.bestForNavigation);
 
-      //     var time = DateTime.now();
+          var latj = geoLoc.latitude;
+          var longj = geoLoc.longitude;
 
-      //     if (time.minute > 44) {
-      //       s.pause();
-      //     }
-      //     print(a);
-      //   });
-      // } else {
-      //   s.pause();
-      // }
+          var d = position.distanceBetween(
+              lati, longi, latj, longj);
+          // var d = acos(
+          //           (sin(lati * dtor) * sin(latj * dtor)) +
+          //             cos(lati * dtor) *
+          //             cos(latj * dtor) *
+          //             cos((longj - longi) * dtor)) *
+          //         6371000;
+
+          // print("latitude i: $lati");
+          // print("longitude i: $longi\n");
+          // print("latitude j: $latj");
+          // print("longitude j: $longj");
+
+          lati = latj;
+          longi = longj;
+
+          // if (time.hour <= 4 && time.minute <= 0) print(a);
+          if (time.minute <= 15) a += d;
+
+          print(a);
+        });
+      } else {
+        s.pause();
+      }
     });
   }
 }
@@ -259,7 +312,11 @@ class _DailyChartState extends State<DailyChart> {
     bool _mode = widget.mode;
     double A = 0, B = 0, C = 0;
 
-    if (_mode) A = 4;
+    print("dailyChart: $_mode");
+    if (_mode)
+      setState(() {
+        A = 4;
+      });
     DateTime time = DateTime.now();
 
     return Column(

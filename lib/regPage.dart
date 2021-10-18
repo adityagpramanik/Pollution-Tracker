@@ -2,15 +2,17 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:neumorphic_container/neumorphic_container.dart';
 import 'package:ptracker/dashboard.dart';
+import 'package:ptracker/utils/SharedPref.dart';
 
-class MyHomePage extends StatefulWidget {
+class RegPage extends StatefulWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<RegPage> createState() => _RegPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _RegPageState extends State<RegPage> {
   Widget vertDiff = SizedBox(
     height: 30,
   );
@@ -91,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               });
                             },
                           ),
-                          Text("Car")
+                          const Text("Car")
                         ],
                       ),
                       Row(
@@ -106,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               });
                             },
                           ),
-                          Text('Bike')
+                          const Text('Bike')
                         ],
                       ),
                     ],
@@ -134,11 +136,12 @@ class _MyHomePageState extends State<MyHomePage> {
                         textInputAction: TextInputAction.next,
                         keyboardType: TextInputType.text,
                         validator: (value) {
-                          if (value!.isEmpty)
+                          if (value!.isEmpty) {
                             return "Can't be empty";
-                          else if (!(value.contains(RegExp('[a-zA-Z]'))) ||
-                              (value.contains(RegExp('[0-9]'))))
+                          } else if (!(value.contains(RegExp('[a-zA-Z]'))) ||
+                              (value.contains(RegExp('[0-9]')))) {
                             return "Please enter a valid company";
+                          }
                           return null;
                         },
                       ),
@@ -216,14 +219,21 @@ class _MyHomePageState extends State<MyHomePage> {
                       borderRadius: BorderRadius.circular(10)),
                 ),
                 onPressed: () {
-                  // if (fkey.currentState!.validate()) {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => Dashboard(
-                                mode: false,
-                              )));
-                  // }
+                  if (fkey.currentState!.validate()) {
+                    SharedPref.setName(name.text);
+                    SharedPref.setType(vType);
+                    SharedPref.setComp(company.text);
+                    SharedPref.setModel(model.text);
+                    SharedPref.setMlg(mileage.text);
+                    SharedPref.setLog(true);
+
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Dashboard(
+                                  mode: false,
+                                )));
+                  }
                 },
                 child: Text(
                   "Proceed",
