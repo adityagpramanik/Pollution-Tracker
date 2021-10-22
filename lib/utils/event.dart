@@ -1,6 +1,13 @@
 class EventField {
   static final List<String> values = [
-    id, valA, valB, valC, distance, checkpoint, emission, time
+    id,
+    valA,
+    valB,
+    valC,
+    distance,
+    checkpoint,
+    emission,
+    time
   ];
 
   static const String id = 'id';
@@ -21,7 +28,7 @@ class Event {
   final double distance;
   final DateTime checkpoint;
   final double emission;
-  final DateTime time;
+  final String time;
 
   const Event({
     this.id,
@@ -42,7 +49,7 @@ class Event {
     double? distance,
     DateTime? checkpoint,
     double? emission,
-    DateTime? time,
+    String? time,
   }) =>
       Event(
         id: id ?? this.id,
@@ -63,7 +70,7 @@ class Event {
         distance: json[EventField.distance] as double,
         checkpoint: json[EventField.checkpoint] as DateTime,
         emission: json[EventField.emission] as double,
-        time: json[EventField.time] as DateTime,
+        time: json[EventField.time] as String,
       );
 
   Map<String, Object?> toJson() => {
@@ -76,4 +83,9 @@ class Event {
         EventField.emission: emission,
         EventField.time: time,
       };
+
+  @override
+  String toString() {
+    return 'Event {id: $id, valA: $valA, valB: $valB, valC: $valC, distance: $distance, checkpoint: $checkpoint, emission: $emission, time: $time}';
+  }
 }

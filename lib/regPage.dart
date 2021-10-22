@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:neumorphic_container/neumorphic_container.dart';
 import 'package:ptracker/dashboard.dart';
-import 'package:ptracker/utils/SharedPref.dart';
+import 'package:ptracker/utils/sharedPref.dart';
 
 class RegPage extends StatefulWidget {
   @override
@@ -224,7 +224,7 @@ class _RegPageState extends State<RegPage> {
                     SharedPref.setType(vType);
                     SharedPref.setComp(company.text);
                     SharedPref.setModel(model.text);
-                    SharedPref.setMlg(mileage.text);
+                    SharedPref.setMlg(double.parse(mileage.text));
                     SharedPref.setLog(true);
 
                     Navigator.pushReplacement(

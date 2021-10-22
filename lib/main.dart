@@ -1,8 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ptracker/homePage.dart';
+import 'package:ptracker/utils/eventDatabase.dart';
+import 'package:sqflite/sqflite.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  final database = EventDatabase.instance;
+  
   runApp(const MyApp());
 }
 

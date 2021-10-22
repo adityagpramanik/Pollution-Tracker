@@ -7,9 +7,13 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 import 'package:neumorphic_container/neumorphic_container.dart';
 import 'package:ptracker/pollution.dart';
-import 'package:ptracker/utils/SharedPref.dart';
+import 'package:ptracker/utils/sharedPref.dart';
+import 'package:ptracker/utils/emission.dart';
+import 'package:ptracker/utils/event.dart';
+import 'package:ptracker/utils/eventDatabase.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
 class Dashboard extends StatefulWidget {
@@ -24,20 +28,37 @@ class _DashboardState extends State<Dashboard> {
   bool superMode;
   _DashboardState(this.superMode);
 
-  StreamSubscription s = accelerometerEvents.listen((event) {});
+  Emission co2em = Emission();
   GeolocatorPlatform position = GeolocatorPlatform.instance;
-  double a = 0;
+  StreamSubscription subs =
+      GeolocatorPlatform.instance.getPositionStream().listen((event) {});
+  double pointA = 0, pointB = 0, pointC = 0;
   String? name, company, model;
+  String date =
+      DateFormat(DateFormat.YEAR_NUM_MONTH_DAY).format(DateTime.now());
+  EventDatabase db = EventDatabase.instance;
 
   void setData() async {
     var getName = await SharedPref.getName();
     var getCompany = await SharedPref.getComp();
     var getModel = await SharedPref.getModel();
 
-    setState(() async {
-      name = getName!.split(" ")[0];
-      company = getCompany;
-      model = getModel;
+    await db.readEvent(date).then((event) {
+      try {
+        setState(() {
+          pointA = event.valA;
+          pointB = event.valB;
+          pointC = event.valC;
+        });
+      } catch (e) {
+        print('$e');
+      }
+
+      setState(() {
+        name = getName!.split(" ")[0];
+        company = getCompany;
+        model = getModel;
+      });
     });
   }
 
@@ -147,7 +168,9 @@ class _DashboardState extends State<Dashboard> {
                         ],
                       ),
                       child: DailyChart(
-                        mode: _mode,
+                        pointA: pointA,
+                        pointB: pointB,
+                        pointC: pointC,
                       ),
                     ),
                   ),
@@ -184,7 +207,7 @@ class _DashboardState extends State<Dashboard> {
                         curvature: Curvature.flat,
                         child: Center(
                             child: Text(
-                          superMode.toString() + ': ' + a.toString(),
+                          superMode.toString() + ': ' + pointA.toString(),
                           // _mode ? "//Monthly" : "something else",
                           style:
                               TextStyle(color: Color.fromRGBO(164, 43, 20, 1)),
@@ -233,11 +256,11 @@ class _DashboardState extends State<Dashboard> {
                           height: 38,
                           width: 84,
                           showOnOff: true,
-                          activeTextColor: Color(0x99202E55),
-                          inactiveTextColor: Color(0x99202E55),
+                          activeTextColor: const Color(0x99202E55),
+                          inactiveTextColor: const Color(0x99202E55),
                           toggleSize: 28,
-                          activeToggleColor: Color(0XFF2827CC),
-                          inactiveToggleColor: Color(0XFF50DBB4),
+                          activeToggleColor: const Color(0XFF2827CC),
+                          inactiveToggleColor: const Color(0XFF50DBB4),
                         ),
                       ],
                     )),
@@ -252,55 +275,68 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void change(bool val) async {
-    // var dtor = pi / 180;
     var geoLoc = await position.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation);
-    var lati = geoLoc.latitude;
-    var longi = geoLoc.longitude;
+    double lati = geoLoc.latitude;
+    double longi = geoLoc.longitude;
+
+    if (val) {
+      subs = position.getPositionStream().listen((event) {
+        DateTime? time = event.timestamp;
+        double latj = event.latitude;
+        double longj = event.longitude;
+
+        double d = position.distanceBetween(lati, longi, latj, longj);
+
+        // print("start --> lat: $lati");
+        // print("start --> long: $longi");
+        // print("end --> lat: $latj");
+        // print("end --> long: $longj");
+        // print("distance --> $d");
+        // print("distance diff: $d");
+        // print("total distance: $pointA");
+
+        if (time!.hour >= 4 && time.hour <= 12)
+          pointA += d;
+        else if (time.hour > 12 && time.hour <= 20)
+          pointB += d;
+        else if (time.hour > 20 && time.hour <= 4) pointC += d;
+
+        lati = latj;
+        longi = longj;
+      });
+    } else {
+      var distance = pointA + pointB + pointC;
+      distance = double.parse(distance.toStringAsFixed(2));
+      double emission = await co2em.getEmission(distance);
+
+      Event e = Event(
+          valA: double.parse(pointA.toStringAsFixed(2)),
+          valB: double.parse(pointB.toStringAsFixed(2)),
+          valC: double.parse(pointC.toStringAsFixed(2)),
+          distance: distance,
+          checkpoint: DateTime.now(),
+          emission: emission,
+          time:
+              DateFormat(DateFormat.YEAR_NUM_MONTH_DAY).format(DateTime.now()));
+      db.create(e);
+      subs.pause();
+    }
 
     setState(() {
       superMode = val;
-      if (val) {
-        s = accelerometerEvents.listen((event) async {
-          var time = DateTime.now();
-          geoLoc = await position.getCurrentPosition(
-              desiredAccuracy: LocationAccuracy.bestForNavigation);
-
-          var latj = geoLoc.latitude;
-          var longj = geoLoc.longitude;
-
-          var d = position.distanceBetween(
-              lati, longi, latj, longj);
-          // var d = acos(
-          //           (sin(lati * dtor) * sin(latj * dtor)) +
-          //             cos(lati * dtor) *
-          //             cos(latj * dtor) *
-          //             cos((longj - longi) * dtor)) *
-          //         6371000;
-
-          // print("latitude i: $lati");
-          // print("longitude i: $longi\n");
-          // print("latitude j: $latj");
-          // print("longitude j: $longj");
-
-          lati = latj;
-          longi = longj;
-
-          // if (time.hour <= 4 && time.minute <= 0) print(a);
-          if (time.minute <= 15) a += d;
-
-          print(a);
-        });
-      } else {
-        s.pause();
-      }
     });
   }
 }
 
 class DailyChart extends StatefulWidget {
-  bool mode;
-  DailyChart({Key? key, required this.mode}) : super(key: key);
+  double pointA, pointB, pointC;
+  DailyChart(
+      {Key? key,
+      required this.pointA,
+      required this.pointB,
+      required this.pointC})
+      : super(key: key);
 
   @override
   _DailyChartState createState() => _DailyChartState();
@@ -309,15 +345,7 @@ class DailyChart extends StatefulWidget {
 class _DailyChartState extends State<DailyChart> {
   @override
   Widget build(BuildContext context) {
-    bool _mode = widget.mode;
-    double A = 0, B = 0, C = 0;
-
-    print("dailyChart: $_mode");
-    if (_mode)
-      setState(() {
-        A = 4;
-      });
-    DateTime time = DateTime.now();
+    double A = widget.pointA, B = widget.pointB, C = widget.pointC;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

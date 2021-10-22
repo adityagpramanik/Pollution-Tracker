@@ -5,7 +5,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class EventDatabase {
-  static const tableEvent = 'events';
+  static const tableEvent = 'eventsTable';
   static final EventDatabase instance = EventDatabase._init();
 
   static Database? _database;
@@ -28,21 +28,41 @@ class EventDatabase {
 
   Future _createDB(Database db, int version) async {
     const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
-    const doubleType = 'DOUBLE NOT NULL';
+    const doubleType = 'REAL NOT NULL';
+    const textType = 'TEXT NOT NULL';
     const datetimeType = 'DATETIME NOT NULL';
 
-    await db.execute('''
-      CREATE TABLE $tableEvent ( 
-        ${EventField.id} $idType, 
-        ${EventField.valA} $doubleType,
-        ${EventField.valB} $doubleType,
-        ${EventField.valC} $doubleType,
-        ${EventField.distance} $doubleType,
-        ${EventField.checkpoint} $datetimeType,
-        ${EventField.emission} $doubleType,
-        ${EventField.time} $datetimeType,
-          )
-    ''');
+    // await db
+    //     .execute("CREATE TABLE ? (? ?, ? ?, ? ?, ? ?, ? ?, ? ?, ? ?, ? ?)", [
+    //   tableEvent,
+    //   EventField.id,
+    //   idType,
+    //   EventField.valA,
+    //   doubleType,
+    //   EventField.valB,
+    //   doubleType,
+    //   EventField.valC,
+    //   doubleType,
+    //   EventField.distance,
+    //   doubleType,
+    //   EventField.checkpoint,
+    //   datetimeType,
+    //   EventField.emission,
+    //   doubleType,
+    //   EventField.time,
+    //   textType
+    // ]);
+
+    await db.execute("CREATE TABLE $tableEvent ("
+        "${EventField.id} $idType,"
+        "${EventField.valA} $doubleType,"
+        "${EventField.valB} $doubleType,"
+        "${EventField.valC} $doubleType,"
+        "${EventField.distance} $doubleType,"
+        "${EventField.checkpoint} $datetimeType,"
+        "${EventField.emission} $doubleType,"
+        "${EventField.time} $datetimeType"
+        ");");
   }
 
   // create event
@@ -53,24 +73,24 @@ class EventDatabase {
   }
 
   // read single tupple
-  Future<Event> readEvent(int id) async {
+  Future<Event> readEvent(String date) async {
     final db = await instance.database;
 
     final maps = await db.query(
       tableEvent,
       columns: EventField.values,
-      where: '${EventField.id} = ?',
-      whereArgs: [id],
+      where: '${EventField.time} = ?',
+      whereArgs: [date],
     );
 
     if (maps.isNotEmpty) {
       return Event.fromJson(maps.first);
     } else {
-      throw Exception('ID $id not found');
+      throw Exception('Row with $date not found');
     }
   }
 
-  Future<List<Event>> readAllNotes() async {
+  Future<List<Event>> readEvents() async {
     final db = await instance.database;
 
     final orderBy = '${EventField.time} ASC';

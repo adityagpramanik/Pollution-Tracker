@@ -29,44 +29,49 @@ class SharedPref {
     return await prefs.setString(modelKey, model);
   }
 
-  static Future<bool> setMlg(String mlg) async {
+  static Future<bool> setMlg(double mlg) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return await prefs.setString(mlgKey, mlg);
+    return await prefs.setDouble(mlgKey, mlg);
   }
 
-  static Future<bool> setLog(bool mlg) async {
+  static Future<bool> setLog(bool logStat) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return await prefs.setBool(mlgKey, mlg);
+    return await prefs.setBool(logKey, logStat);
   }
 
   // getters
   static Future<String?> getName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    // ignore: await_only_futures
     return await prefs.getString(nameKey);
   }
 
   static Future<String?> getType() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    // ignore: await_only_futures
     return await prefs.getString(typeKey);
   }
 
   static Future<String?> getComp() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    // ignore: await_only_futures
     return await prefs.getString(compKey);
   }
 
   static Future<String?> getModel() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    // ignore: await_only_futures
     return await prefs.getString(modelKey);
   }
 
-  static Future<String?> getMlg() async {
+  static Future<double?> getMlg() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return await prefs.getString(mlgKey);
+    return prefs.getDouble(mlgKey);
   }
 
   static Future<bool?> getLog() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return await prefs.getBool(mlgKey);
+    // ignore: await_only_futures
+    return await prefs.getBool(logKey);
   }
 }

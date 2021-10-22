@@ -1,8 +1,7 @@
-// ignore: file_names
 import 'package:flutter/material.dart';
 import 'package:ptracker/dashboard.dart';
 import 'package:ptracker/regPage.dart';
-import 'package:ptracker/utils/SharedPref.dart';
+import 'package:ptracker/utils/sharedPref.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
