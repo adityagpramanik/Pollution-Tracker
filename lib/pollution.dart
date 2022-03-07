@@ -2,43 +2,50 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 class Pollution extends StatefulWidget {
-  Pollution({Key? key}) : super(key: key);
+  double emission;
+  Pollution({Key? key, required this.emission}) : super(key: key);
 
   @override
   _PollutionState createState() => _PollutionState();
 }
 
 class _PollutionState extends State<Pollution> {
+  static const double bharatEmission = 2268;
+
   @override
   Widget build(BuildContext context) {
-    double radius = 25;
+    double percentage = (widget.emission * 100) / bharatEmission;
+    percentage = double.parse(percentage.toStringAsPrecision(1));
+    double radius = 35;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      // mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         Stack(
           children: [
             CircleAvatar(
               radius: radius,
               child: CircleAvatar(
-                radius: radius - 4,
+                radius: radius - 6,
                 backgroundColor: Colors.red,
                 child: Stack(
                   children: [
                     ClipPath(
-                      clipper: MyPainter(),
+                      // clipper: MyPainter(),
                       child: CircleAvatar(
-                        radius: radius - 3,
-                        backgroundColor: Colors.amberAccent,
+                        radius: radius - 6,
+                        backgroundColor:
+                            const Color.fromARGB(255, 250, 210, 212),
+                        // backgroundColor: Colors.amberAccent,
                       ),
                     ),
                     Center(
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 5),
+                        padding: EdgeInsets.only(top: 5),
                         child: Text(
-                          "2%",
+                          "$percentage%",
                           style:
-                              TextStyle(fontSize: 20, color: Color(0xff091B47)),
+                              TextStyle(fontSize: 16, color: Color(0xff091B47)),
                         ),
                       ),
                     ),
@@ -48,15 +55,18 @@ class _PollutionState extends State<Pollution> {
             ),
           ],
         ),
+        SizedBox(
+          width: 20,
+        ),
         Padding(
           padding: const EdgeInsets.only(top: 10),
           child: RichText(
-              text: TextSpan(
+              text: const TextSpan(
                   style: TextStyle(color: Color(0xff091B47)),
                   children: [
-                TextSpan(text: 'of '),
+                TextSpan(text: 'of Trillionth'),
                 TextSpan(
-                    text: 'Pollution',
+                    text: '\nPollution',
                     style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w500,

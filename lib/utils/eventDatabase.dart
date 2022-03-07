@@ -23,6 +23,8 @@ class EventDatabase {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
+    print("Db path : $path");
+
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
@@ -63,6 +65,19 @@ class EventDatabase {
         "${EventField.emission} $doubleType,"
         "${EventField.time} $datetimeType"
         ");");
+
+    // await db.execute('''
+    //   CREATE TABLE $tableEvent (
+    //     ${EventField.id} $idType,
+    //     ${EventField.valA} $doubleType,
+    //     ${EventField.valB} $doubleType,
+    //     ${EventField.valC} $doubleType,
+    //     ${EventField.distance} $doubleType,
+    //     ${EventField.checkpoint} $datetimeType,
+    //     ${EventField.emission} $doubleType,
+    //     ${EventField.time} $datetimeType
+    //     );
+    //     ''');
   }
 
   // create event

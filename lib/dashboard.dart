@@ -1,5 +1,3 @@
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 import 'dart:math';
 
@@ -15,6 +13,8 @@ import 'package:ptracker/utils/emission.dart';
 import 'package:ptracker/utils/event.dart';
 import 'package:ptracker/utils/eventDatabase.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+
+const double CPL = 2428;
 
 class Dashboard extends StatefulWidget {
   bool mode;
@@ -32,34 +32,47 @@ class _DashboardState extends State<Dashboard> {
   GeolocatorPlatform position = GeolocatorPlatform.instance;
   StreamSubscription subs =
       GeolocatorPlatform.instance.getPositionStream().listen((event) {});
-  double pointA = 0, pointB = 0, pointC = 0;
+  late double pointA, pointB, pointC;
   String? name, company, model;
+  late double? mlg;
+  late double emission = 0;
   String date =
       DateFormat(DateFormat.YEAR_NUM_MONTH_DAY).format(DateTime.now());
-  EventDatabase db = EventDatabase.instance;
+  // late EventDatabase db;
 
   void setData() async {
+    // setState(() {
+    //   db = EventDatabase.instance;
+    // });
+    var valA = await SharedPref.getValA();
+    var valB = await SharedPref.getValB();
+    var valC = await SharedPref.getValC();
     var getName = await SharedPref.getName();
     var getCompany = await SharedPref.getComp();
     var getModel = await SharedPref.getModel();
+    mlg = await SharedPref.getMlg();
 
-    await db.readEvent(date).then((event) {
-      try {
-        setState(() {
-          pointA = event.valA;
-          pointB = event.valB;
-          pointC = event.valC;
-        });
-      } catch (e) {
-        print('$e');
-      }
+    // await db.readEvent(date).then((event) {
+    //   try {
+    //     setState(() {
+    //       pointA = event.valA;
+    //       pointB = event.valB;
+    //       pointC = event.valC;
+    //     });
+    //   } catch (e) {
+    //     print('$e');
+    //   }
 
-      setState(() {
-        name = getName!.split(" ")[0];
-        company = getCompany;
-        model = getModel;
-      });
+    setState(() {
+      name = getName!.split(" ")[0];
+      company = getCompany;
+      model = getModel;
+
+      pointA = valA!;
+      pointB = valB!;
+      pointC = valC!;
     });
+    // });
   }
 
   @override
@@ -129,10 +142,13 @@ class _DashboardState extends State<Dashboard> {
                     child: Center(
                         child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Pollution(),
+                      child: Pollution(
+                          emission:
+                              double.parse(emission.toStringAsPrecision(2))),
                     )),
                   ),
-                  const SizedBox(height: 30),
+                  // const SizedBox(height: 30), //beffore
+                  const SizedBox(height: 120),
                   AspectRatio(
                     aspectRatio: 1.52,
                     child: Container(
@@ -167,56 +183,55 @@ class _DashboardState extends State<Dashboard> {
                           ),
                         ],
                       ),
-                      child: DailyChart(
-                        pointA: pointA,
-                        pointB: pointB,
-                        pointC: pointC,
-                      ),
+                      child: DailyChart(),
                     ),
                   ),
                   const SizedBox(height: 30),
-                  Row(
-                    children: [
-                      NeumorphicContainer(
-                        spread: 2,
-                        depth: 40,
-                        height: 240,
-                        width: 170,
-                        borderRadius: 10,
-                        primaryColor: const Color.fromARGB(255, 254, 243, 244),
-                        //concave neumorphism design
-                        curvature: Curvature.flat,
-                        child: const Center(
-                            child: Text(
-                          "//Weekly",
-                          style:
-                              TextStyle(color: Color.fromRGBO(164, 43, 20, 1)),
-                        )),
-                      ),
-                      const SizedBox(
-                        width: 30,
-                      ),
-                      NeumorphicContainer(
-                        spread: 2,
-                        depth: 40,
-                        height: 240,
-                        width: 170,
-                        borderRadius: 10,
-                        primaryColor: const Color.fromARGB(255, 254, 243, 244),
-                        //concave neumorphism design
-                        curvature: Curvature.flat,
-                        child: Center(
-                            child: Text(
-                          superMode.toString() + ': ' + pointA.toString(),
-                          // _mode ? "//Monthly" : "something else",
-                          style:
-                              TextStyle(color: Color.fromRGBO(164, 43, 20, 1)),
-                        )),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   children: [
+                  //     NeumorphicContainer(
+                  //       spread: 2,
+                  //       depth: 40,
+                  //       height: 240,
+                  //       width: 170,
+                  //       borderRadius: 10,
+                  //       primaryColor: const Color.fromARGB(255, 254, 243, 244),
+                  //       //concave neumorphism design
+                  //       curvature: Curvature.flat,
+                  //       child: const Center(
+                  //           child: Text(
+                  //         "//Weekly",
+                  //         style:
+                  //             TextStyle(color: Color.fromRGBO(164, 43, 20, 1)),
+                  //       )),
+                  //     ),
+                  //     const SizedBox(
+                  //       width: 30,
+                  //     ),
+                  //     NeumorphicContainer(
+                  //       spread: 2,
+                  //       depth: 40,
+                  //       height: 240,
+                  //       width: 170,
+                  //       borderRadius: 10,
+                  //       primaryColor: const Color.fromARGB(255, 254, 243, 244),
+                  //       //concave neumorphism design
+                  //       curvature: Curvature.flat,
+                  //       child: Center(
+                  //           child: Text(
+                  //         superMode.toString() + ': ' + pointA.toString(),
+                  //         // _mode ? "//Monthly" : "something else",
+                  //         style:
+                  //             TextStyle(color: Color.fromRGBO(164, 43, 20, 1)),
+                  //       )),
+                  //     ),
+                  //   ],
+                  // ),
+                  // const SizedBox(
+                  //   height: 30,
+                  // ), //before
                   const SizedBox(
-                    height: 30,
+                    height: 120,
                   ),
                   NeumorphicContainer(
                     spread: 2,
@@ -275,10 +290,20 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void change(bool val) async {
+    var permission = await position.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await position.requestPermission();
+      if (permission == LocationPermission.denied) {
+        print("Permission denied");
+      }
+    }
     var geoLoc = await position.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation);
     double lati = geoLoc.latitude;
     double longi = geoLoc.longitude;
+
+    double distance;
+    double fuelUsed;
 
     if (val) {
       subs = position.getPositionStream().listen((event) {
@@ -296,56 +321,91 @@ class _DashboardState extends State<Dashboard> {
         // print("distance diff: $d");
         // print("total distance: $pointA");
 
-        if (time!.hour >= 4 && time.hour <= 12)
-          pointA += d;
-        else if (time.hour > 12 && time.hour <= 20)
-          pointB += d;
-        else if (time.hour > 20 && time.hour <= 4) pointC += d;
+        setState(() {
+          if (time!.hour >= 4 && time.hour <= 12)
+            pointA += d;
+          else if (time.hour > 12 && time.hour <= 20)
+            pointB += d;
+          else if (time.hour > 20 && time.hour <= 4) pointC += d;
+        });
+
+        print("pointA: $pointA");
+        print("pointB: $pointB");
+        print("pointC: $pointC");
 
         lati = latj;
         longi = longj;
       });
     } else {
-      var distance = pointA + pointB + pointC;
-      distance = double.parse(distance.toStringAsFixed(2));
-      double emission = await co2em.getEmission(distance);
+      distance = pointA + pointB + pointC;
+      // distance = double.parse(distance.toStringAsFixed(2));
+      // double emission = await co2em.getEmission(distance);
 
-      Event e = Event(
-          valA: double.parse(pointA.toStringAsFixed(2)),
-          valB: double.parse(pointB.toStringAsFixed(2)),
-          valC: double.parse(pointC.toStringAsFixed(2)),
-          distance: distance,
-          checkpoint: DateTime.now(),
-          emission: emission,
-          time:
-              DateFormat(DateFormat.YEAR_NUM_MONTH_DAY).format(DateTime.now()));
-      db.create(e);
+      // Event e = Event(
+      //     valA: double.parse(pointA.toStringAsFixed(2)),
+      //     valB: double.parse(pointB.toStringAsFixed(2)),
+      //     valC: double.parse(pointC.toStringAsFixed(2)),
+      //     distance: distance,
+      //     checkpoint: DateTime.now(),
+      //     emission: emission,
+      //     time:
+      //         DateFormat(DateFormat.YEAR_NUM_MONTH_DAY).format(DateTime.now()));
+      // db.create(e);
+      await SharedPref.setValA(pointA);
+      await SharedPref.setValB(pointB);
+      await SharedPref.setValC(pointC);
       subs.pause();
     }
 
     setState(() {
+      distance = pointA + pointB + pointC;
+      fuelUsed = distance / (mlg! * 1000);
+      emission = CPL * fuelUsed;
+
+      print("distance: $distance");
+      print("mileage: $mlg");
+      print("emission: $emission");
+
       superMode = val;
     });
   }
 }
 
 class DailyChart extends StatefulWidget {
-  double pointA, pointB, pointC;
-  DailyChart(
-      {Key? key,
-      required this.pointA,
-      required this.pointB,
-      required this.pointC})
-      : super(key: key);
+  DailyChart({Key? key}) : super(key: key);
 
   @override
   _DailyChartState createState() => _DailyChartState();
 }
 
 class _DailyChartState extends State<DailyChart> {
+  late double A, B, C, mlg;
+
+  void setData() async {
+    double? valA = await SharedPref.getValA();
+    double? valB = await SharedPref.getValB();
+    double? valC = await SharedPref.getValC();
+    double? valMlg = await SharedPref.getMlg();
+
+    setState(() {
+      A = valA!;
+      B = valB!;
+      C = valC!;
+      mlg = valMlg!;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setData();
+  }
+
   @override
   Widget build(BuildContext context) {
-    double A = widget.pointA, B = widget.pointB, C = widget.pointC;
+    // print("A: $A");
+    // print("B: $B");
+    // print("C: $C");
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -353,15 +413,18 @@ class _DailyChartState extends State<DailyChart> {
         const SizedBox(
           height: 25,
         ),
-        const Text(
-          'Hourly Emission',
-          style: TextStyle(
-            color: Color(0xFFA52B14),
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            'Hourly Emission',
+            style: TextStyle(
+              color: Color(0xFFA52B14),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
         ),
         const SizedBox(
           height: 25,
@@ -369,11 +432,7 @@ class _DailyChartState extends State<DailyChart> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.only(right: 30, left: 6.0),
-            child: DailyChartData(
-              a: A,
-              b: B,
-              c: C,
-            ),
+            child: DailyChartData(),
           ),
         ),
         const SizedBox(
@@ -386,51 +445,77 @@ class _DailyChartState extends State<DailyChart> {
 
 // ignore: must_be_immutable
 class DailyChartData extends StatefulWidget {
-  double a, b, c;
-  DailyChartData({Key? key, required this.a, required this.b, required this.c})
-      : super(key: key);
+  DailyChartData({Key? key}) : super(key: key);
 
   @override
-  _DailyChartDataState createState() => _DailyChartDataState(a, b, c);
+  _DailyChartDataState createState() => _DailyChartDataState();
 }
 
 class _DailyChartDataState extends State<DailyChartData> {
-  double valueA, valueB, valueC;
-  _DailyChartDataState(this.valueA, this.valueB, this.valueC);
-
   final List<int> indexes = [2, 4, 6];
   late List<FlSpot> spots;
   late List<LineChartBarData> lineChartBDlist;
+  late double A, B, C, mlg;
+
+  void setData() async {
+    double? valA = await SharedPref.getValA();
+    double? valB = await SharedPref.getValB();
+    double? valC = await SharedPref.getValC();
+    double? valMlg = await SharedPref.getMlg();
+
+    setState(() {
+      A = valA!;
+      B = valB!;
+      C = valC!;
+      mlg = valMlg!;
+    });
+  }
+
+  @override
+  void initState() {
+    setData();
+  }
 
   @override
   Widget build(BuildContext context) {
-    spots = [
-      FlSpot(indexes[0].toDouble(), valueA),
-      FlSpot(indexes[1].toDouble(), valueB),
-      FlSpot(indexes[2].toDouble(), valueC),
-    ];
-    lineChartBDlist = [
-      LineChartBarData(
-        show: true,
-        showingIndicators: indexes,
-        isCurved: true,
-        colors: const [Color(0xffA52B14)],
-        barWidth: 5,
-        isStrokeCapRound: true,
-        dotData: FlDotData(
+    double valueA = A, valueB = B, valueC = C;
+    valueA = valueA * CPL / mlg * 1000;
+    valueB = valueB * CPL / mlg * 1000;
+    valueC = valueC * CPL / mlg * 1000;
+
+    print("A: $valueA");
+    print("B: $valueB");
+    print("C: $valueC");
+
+    setState(() {
+      spots = [
+        FlSpot(indexes[0].toDouble(), valueA),
+        FlSpot(indexes[1].toDouble(), valueB),
+        FlSpot(indexes[2].toDouble(), valueC),
+      ];
+      lineChartBDlist = [
+        LineChartBarData(
           show: true,
-          getDotPainter: (spot, percent, bardata, index) {
-            return FlDotCirclePainter(
-              radius: 10,
-              color: const Color.fromRGBO(165, 43, 20, 0.7),
-              strokeWidth: 0,
-              // strokeColor: Colors.deepOrange,
-            );
-          },
-        ),
-        spots: spots,
-      )
-    ];
+          showingIndicators: indexes,
+          isCurved: true,
+          colors: const [Color(0xffA52B14)],
+          barWidth: 5,
+          isStrokeCapRound: true,
+          dotData: FlDotData(
+            show: true,
+            getDotPainter: (spot, percent, bardata, index) {
+              return FlDotCirclePainter(
+                radius: 10,
+                color: const Color.fromRGBO(165, 43, 20, 0.7),
+                strokeWidth: 0,
+                // strokeColor: Colors.deepOrange,
+              );
+            },
+          ),
+          spots: spots,
+        )
+      ];
+    });
 
     return LineChart(
       chartData(valueA, valueB, valueC),

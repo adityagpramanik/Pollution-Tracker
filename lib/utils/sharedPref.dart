@@ -7,6 +7,9 @@ class SharedPref {
   static String modelKey = "MODELKEY";
   static String mlgKey = "MLGKEY";
   static String logKey = "LOGKEY";
+  static String valAkey = "VALAKEY";
+  static String valBkey = "VALBKEY";
+  static String valCkey = "VALCKEY";
 
   // setters
   static Future<bool> setName(String name) async {
@@ -37,6 +40,19 @@ class SharedPref {
   static Future<bool> setLog(bool logStat) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return await prefs.setBool(logKey, logStat);
+  }
+
+  static Future<bool> setValA(double valA) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return await prefs.setDouble(valAkey, valA);
+  }
+  static Future<bool> setValB(double valB) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return await prefs.setDouble(valBkey, valB);
+  }
+  static Future<bool> setValC(double valC) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return await prefs.setDouble(valCkey, valC);
   }
 
   // getters
@@ -73,5 +89,18 @@ class SharedPref {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // ignore: await_only_futures
     return await prefs.getBool(logKey);
+  }
+
+  static Future<double?> getValA() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return await prefs.getDouble(valAkey);
+  }
+  static Future<double?> getValB() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return await prefs.getDouble(valBkey);
+  }
+  static Future<double?> getValC() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return await prefs.getDouble(valCkey);
   }
 }

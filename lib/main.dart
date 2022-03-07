@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PolluSync',
+      title: 'Ptracker',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

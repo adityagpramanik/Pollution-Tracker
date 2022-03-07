@@ -226,6 +226,9 @@ class _RegPageState extends State<RegPage> {
                     SharedPref.setModel(model.text);
                     SharedPref.setMlg(double.parse(mileage.text));
                     SharedPref.setLog(true);
+                    SharedPref.setValA(0);
+                    SharedPref.setValB(0);
+                    SharedPref.setValC(0);
 
                     Navigator.pushReplacement(
                         context,
