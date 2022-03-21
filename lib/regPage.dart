@@ -23,6 +23,7 @@ class _RegPageState extends State<RegPage> {
   String vType = "";
 
   TextEditingController name = TextEditingController();
+  TextEditingController email = TextEditingController();
   TextEditingController company = TextEditingController();
   TextEditingController model = TextEditingController();
   TextEditingController mileage = TextEditingController();
@@ -46,7 +47,7 @@ class _RegPageState extends State<RegPage> {
                     depth: 60,
                     spread: 0,
                     borderColor: Colors.black26,
-                    primaryColor: Colors.indigo[100],
+                    primaryColor: Colors.indigo.shade100,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: TextFormField(
@@ -69,6 +70,40 @@ class _RegPageState extends State<RegPage> {
                           } else if (!(value.contains(RegExp('[a-zA-Z]'))) ||
                               (value.contains(RegExp('[0-9]')))) {
                             return "Please enter a valid name";
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ),
+                  NeumorphicContainer(
+                    borderRadius: 10,
+                    depth: 60,
+                    spread: 0,
+                    borderColor: Colors.black26,
+                    primaryColor: Colors.indigo.shade100,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: TextFormField(
+                        controller: email,
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                            label: Text(
+                              "Email",
+                              style: TextStyle(
+                                color: Colors.indigo[900],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            hintText: "example@google.com",
+                            border: InputBorder.none),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return "Can't be empty";
+                          } else if (!(value.contains(
+                              RegExp('^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\$')))) {
+                            return "Please enter a valid email";
                           }
                           return null;
                         },
@@ -118,7 +153,7 @@ class _RegPageState extends State<RegPage> {
                     depth: 60,
                     spread: 0,
                     borderColor: Colors.black26,
-                    primaryColor: Colors.indigo[100],
+                    primaryColor: Colors.indigo.shade100,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: TextFormField(
@@ -153,7 +188,7 @@ class _RegPageState extends State<RegPage> {
                     depth: 60,
                     spread: 0,
                     borderColor: Colors.black26,
-                    primaryColor: Colors.indigo[100],
+                    primaryColor: Colors.indigo.shade100,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: TextFormField(
@@ -183,7 +218,7 @@ class _RegPageState extends State<RegPage> {
                     depth: 60,
                     spread: 0,
                     borderColor: Colors.black26,
-                    primaryColor: Colors.indigo[100],
+                    primaryColor: Colors.indigo.shade100,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: TextFormField(
@@ -221,14 +256,12 @@ class _RegPageState extends State<RegPage> {
                 onPressed: () {
                   if (fkey.currentState!.validate()) {
                     SharedPref.setName(name.text);
+                    SharedPref.setEmail(email.text);
                     SharedPref.setType(vType);
                     SharedPref.setComp(company.text);
                     SharedPref.setModel(model.text);
                     SharedPref.setMlg(double.parse(mileage.text));
                     SharedPref.setLog(true);
-                    SharedPref.setValA(0);
-                    SharedPref.setValB(0);
-                    SharedPref.setValC(0);
 
                     Navigator.pushReplacement(
                         context,
