@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
+import 'package:http/http.dart' as http;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -8,11 +10,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:neumorphic_container/neumorphic_container.dart';
 import 'package:ptracker/pollution.dart';
+import 'package:ptracker/utils/databasehelper.dart';
 import 'package:ptracker/utils/sharedPref.dart';
 import 'package:ptracker/utils/emission.dart';
 import 'package:ptracker/utils/event.dart';
-import 'package:ptracker/utils/eventDatabase.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:uuid/uuid.dart';
 
 const double CPL = 2428;
 
@@ -32,47 +35,24 @@ class _DashboardState extends State<Dashboard> {
   GeolocatorPlatform position = GeolocatorPlatform.instance;
   StreamSubscription subs =
       GeolocatorPlatform.instance.getPositionStream().listen((event) {});
-  late double pointA, pointB, pointC;
   String? name, company, model;
+  double distance = 0;
+
   late double? mlg;
   late double emission = 0;
-  String date =
-      DateFormat(DateFormat.YEAR_NUM_MONTH_DAY).format(DateTime.now());
-  // late EventDatabase db;
+  late DateTime tstart, tend;
 
   void setData() async {
-    // setState(() {
-    //   db = EventDatabase.instance;
-    // });
-    var valA = await SharedPref.getValA();
-    var valB = await SharedPref.getValB();
-    var valC = await SharedPref.getValC();
     var getName = await SharedPref.getName();
     var getCompany = await SharedPref.getComp();
     var getModel = await SharedPref.getModel();
     mlg = await SharedPref.getMlg();
 
-    // await db.readEvent(date).then((event) {
-    //   try {
-    //     setState(() {
-    //       pointA = event.valA;
-    //       pointB = event.valB;
-    //       pointC = event.valC;
-    //     });
-    //   } catch (e) {
-    //     print('$e');
-    //   }
-
     setState(() {
       name = getName!.split(" ")[0];
       company = getCompany;
       model = getModel;
-
-      pointA = valA!;
-      pointB = valB!;
-      pointC = valC!;
     });
-    // });
   }
 
   @override
@@ -83,9 +63,8 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
-    bool _mode = superMode;
+    print('Widget: ' + superMode.toString());
 
-    print('Widget: ' + _mode.toString());
     return Scaffold(
       backgroundColor: const Color.fromRGBO(255, 255, 255, 0.9),
       body: SingleChildScrollView(
@@ -187,52 +166,35 @@ class _DashboardState extends State<Dashboard> {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  // Row(
-                  //   children: [
-                  //     NeumorphicContainer(
-                  //       spread: 2,
-                  //       depth: 40,
-                  //       height: 240,
-                  //       width: 170,
-                  //       borderRadius: 10,
-                  //       primaryColor: const Color.fromARGB(255, 254, 243, 244),
-                  //       //concave neumorphism design
-                  //       curvature: Curvature.flat,
-                  //       child: const Center(
-                  //           child: Text(
-                  //         "//Weekly",
-                  //         style:
-                  //             TextStyle(color: Color.fromRGBO(164, 43, 20, 1)),
-                  //       )),
-                  //     ),
-                  //     const SizedBox(
-                  //       width: 30,
-                  //     ),
-                  //     NeumorphicContainer(
-                  //       spread: 2,
-                  //       depth: 40,
-                  //       height: 240,
-                  //       width: 170,
-                  //       borderRadius: 10,
-                  //       primaryColor: const Color.fromARGB(255, 254, 243, 244),
-                  //       //concave neumorphism design
-                  //       curvature: Curvature.flat,
-                  //       child: Center(
-                  //           child: Text(
-                  //         superMode.toString() + ': ' + pointA.toString(),
-                  //         // _mode ? "//Monthly" : "something else",
-                  //         style:
-                  //             TextStyle(color: Color.fromRGBO(164, 43, 20, 1)),
-                  //       )),
-                  //     ),
-                  //   ],
-                  // ),
-                  // const SizedBox(
-                  //   height: 30,
-                  // ), //before
                   const SizedBox(
-                    height: 120,
+                    height: 50,
                   ),
+
+                  const Text("Test Text: "),
+
+                  GestureDetector(
+                      onTap: fetchUserData,
+                      child: Container(
+                        margin: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(10),
+                        height: 40,
+                        color: Colors.blue,
+                        child: const Text("add event"),
+                      )),
+
+                  GestureDetector(
+                      onTap: () {
+                        SharedPref.showAll();
+                        DatabaseHelper.instance.getEvents();
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(10),
+                        height: 40,
+                        color: Colors.blue,
+                        child: const Text("get event"),
+                      )),
+
                   NeumorphicContainer(
                     spread: 2,
                     depth: 60,
@@ -289,85 +251,213 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  void fetchUserData() async {
+    var res = await http
+        .get(Uri.parse("https://jsonplaceholder.typicode.com/todos/10"));
+
+    try {
+      dynamic response = json.decode(res.body);
+      print(response);
+    } catch (e) {
+      print(e.toString() + " \n" + res.statusCode.toString());
+    }
+
+    Uuid uuid = Uuid();
+    String eid = uuid.v1().toString();
+    var format = DateFormat("yy-MM-d HH:mm");
+
+    DatabaseHelper.instance.addEvent(Event(
+        eid: eid,
+        start: format.format(DateTime.now().subtract(const Duration(hours: 3))),
+        end: format.format(DateTime.now()),
+        slota: 8,
+        slotb: 9,
+        slotc: 15));
+  }
+
   void change(bool val) async {
+    if (superMode) {
+      tend = DateTime.now();
+    } else if (!superMode) {
+      tstart = DateTime.now();
+    }
+
+    setState(() {
+      superMode = !superMode;
+    });
+
     var permission = await position.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await position.requestPermission();
       if (permission == LocationPermission.denied) {
-        print("Permission denied");
+        debugPrint("Permission denied");
       }
     }
-    var geoLoc = await position.getCurrentPosition(
+    Position geoLoc = await position.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.bestForNavigation);
     double lati = geoLoc.latitude;
     double longi = geoLoc.longitude;
-
-    double distance;
     double fuelUsed;
 
     if (val) {
       subs = position.getPositionStream().listen((event) {
-        DateTime? time = event.timestamp;
         double latj = event.latitude;
         double longj = event.longitude;
 
         double d = position.distanceBetween(lati, longi, latj, longj);
 
-        // print("start --> lat: $lati");
-        // print("start --> long: $longi");
-        // print("end --> lat: $latj");
-        // print("end --> long: $longj");
-        // print("distance --> $d");
-        // print("distance diff: $d");
-        // print("total distance: $pointA");
+        if (d.floor() != 0 && d.floor() != 1) {
+          distance += d;
+        }
 
-        setState(() {
-          if (time!.hour >= 4 && time.hour <= 12)
-            pointA += d;
-          else if (time.hour > 12 && time.hour <= 20)
-            pointB += d;
-          else if (time.hour > 20 && time.hour <= 4) pointC += d;
-        });
-
-        print("pointA: $pointA");
-        print("pointB: $pointB");
-        print("pointC: $pointC");
+        debugPrint(d.toString() + " : " + distance.toString());
 
         lati = latj;
         longi = longj;
       });
     } else {
-      distance = pointA + pointB + pointC;
-      // distance = double.parse(distance.toStringAsFixed(2));
-      // double emission = await co2em.getEmission(distance);
+      Uuid uuid = const Uuid();
+      DateFormat format = DateFormat("yy-MM-d HH:mm");
+      DatabaseHelper db = DatabaseHelper.instance;
 
-      // Event e = Event(
-      //     valA: double.parse(pointA.toStringAsFixed(2)),
-      //     valB: double.parse(pointB.toStringAsFixed(2)),
-      //     valC: double.parse(pointC.toStringAsFixed(2)),
-      //     distance: distance,
-      //     checkpoint: DateTime.now(),
-      //     emission: emission,
-      //     time:
-      //         DateFormat(DateFormat.YEAR_NUM_MONTH_DAY).format(DateTime.now()));
-      // db.create(e);
-      await SharedPref.setValA(pointA);
-      await SharedPref.setValB(pointB);
-      await SharedPref.setValC(pointC);
+      debugPrint("distance: $distance");
+      debugPrint("distance (int): ${distance.floor()}");
+      debugPrint("start time: " + tstart.toString());
+      debugPrint("end time: " + tend.toString());
+
+      List<double> slots = getDistanceSlots(tstart, tend, distance);
+
+      setState(() {
+        distance = 0;
+      });
+
+      debugPrint("distance from each segment: $slots");
+
+      Event event = Event(
+          eid: uuid.v1().toString(),
+          start: format.format(tstart),
+          end: format.format(tend),
+          slota: slots[0],
+          slotb: slots[1],
+          slotc: slots[2]);
+
+      db.addEvent(event);
+
       subs.pause();
     }
+  }
 
-    setState(() {
-      distance = pointA + pointB + pointC;
-      fuelUsed = distance / (mlg! * 1000);
-      emission = CPL * fuelUsed;
+  List<double> getDistanceSlots(DateTime start, DateTime end, double distance) {
+    // TIME BAND
+    // 4*60 = 240 ------- 12*60 = 720 ------- 20*60 = 1200 ----- (20+4)*60 = 1680
 
-      print("distance: $distance");
-      print("mileage: $mlg");
-      print("emission: $emission");
+    List<double> slots = [0, 0, 0];
+    Map<DateTime, int> timeslot = {};
+    double velocity;
 
-      superMode = val;
-    });
+    Duration timeDiff = end.difference(start);
+
+    print("time difference: $timeDiff");
+
+    int startsum = start.hour * 60 + start.minute;
+    int endsum = end.hour * 60 + end.minute;
+
+    if (start.hour >= 0 && start.hour < 4) {
+      startsum = (startsum + 24) * 60 + start.minute;
+    }
+    if (end.hour >= 0 && end.hour < 4) {
+      endsum = (endsum + 24) * 60 + end.minute;
+    }
+
+    // for starting timestamp
+    if (startsum >= 240 && startsum <= 720) {
+      timeslot[start] = 1;
+    } else if (startsum > 720 && startsum <= 1200) {
+      timeslot[start] = 2;
+    } else {
+      timeslot[start] = 3;
+    }
+
+    // for ending timestamp
+    if (endsum >= 240 && endsum <= 720) {
+      timeslot[end] = 1;
+    } else if (endsum > 720 && endsum <= 1200) {
+      timeslot[end] = 2;
+    } else {
+      timeslot[end] = 3;
+    }
+
+    if (distance.floor() != 0 && endsum > startsum) {
+      int time = (timeDiff.inHours * 60) + timeDiff.inMinutes;
+      velocity = distance / time;
+
+      if (velocity.floor() != 0) {
+        if (timeslot[start] == 1 && timeslot[end] == 1) {
+          // slot - A
+          slots[0] = velocity * (endsum - startsum);
+
+          if (timeDiff.inDays != 0) {
+            slots[0] = timeDiff.inDays * (velocity * (endsum - startsum));
+          }
+        } else if (timeslot[start] == 2 && timeslot[end] == 2) {
+          // slot - B
+          slots[1] = velocity * (endsum - startsum);
+
+          if (timeDiff.inDays != 0) {
+            slots[1] = timeDiff.inDays * (velocity * (endsum - startsum));
+          }
+        } else if (timeslot[start] == 3 && timeslot[end] == 3) {
+          // slot - C
+          slots[2] = velocity * (endsum - startsum);
+
+          if (timeDiff.inDays != 0) {
+            slots[2] = timeDiff.inDays * (velocity * (endsum - startsum));
+          }
+        } else if (timeslot[start] == 1 && timeslot[end] == 2) {
+          // A-B
+          slots[0] = velocity * (720 - startsum);
+
+          if (timeDiff.inDays != 0) {
+            slots[0] = timeDiff.inDays * (velocity * (720 - startsum));
+          }
+
+          slots[1] = velocity * (endsum - 720);
+
+          if (timeDiff.inDays != 0) {
+            slots[1] = timeDiff.inDays * (velocity * (endsum - 720));
+          }
+        } else if (timeslot[start] == 1 && timeslot[end] == 3) {
+          // A-C
+          slots[0] = velocity * (720 - startsum);
+          if (timeDiff.inDays != 0) {
+            slots[0] = timeDiff.inDays * (velocity * (720 - startsum));
+          }
+
+          slots[1] = velocity * 480;
+          if (timeDiff.inDays != 0) {
+            slots[1] = timeDiff.inDays * velocity * 480;
+          }
+
+          slots[2] = velocity * (endsum - 1200);
+          if (timeDiff.inDays != 0) {
+            slots[2] = timeDiff.inDays * (velocity * (endsum - 1200));
+          }
+        } else if (timeslot[start] == 2 && timeslot[end] == 3) {
+          // B-C
+          slots[1] = velocity * (1200 - startsum);
+          if (timeDiff.inDays != 0) {
+            slots[1] = timeDiff.inDays * velocity * (1200 - startsum);
+          }
+
+          slots[2] = velocity * (endsum - 1200);
+          if (timeDiff.inDays != 0) {
+            slots[2] = timeDiff.inDays * (velocity * (endsum - 1200));
+          }
+        }
+      }
+    }
+
+    return slots;
   }
 }
 
@@ -382,15 +472,12 @@ class _DailyChartState extends State<DailyChart> {
   late double A, B, C, mlg;
 
   void setData() async {
-    double? valA = await SharedPref.getValA();
-    double? valB = await SharedPref.getValB();
-    double? valC = await SharedPref.getValC();
     double? valMlg = await SharedPref.getMlg();
 
     setState(() {
-      A = valA!;
-      B = valB!;
-      C = valC!;
+      A = 5;
+      B = 8;
+      C = 4;
       mlg = valMlg!;
     });
   }
@@ -403,18 +490,14 @@ class _DailyChartState extends State<DailyChart> {
 
   @override
   Widget build(BuildContext context) {
-    // print("A: $A");
-    // print("B: $B");
-    // print("C: $C");
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         const SizedBox(
           height: 25,
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
           child: Text(
             'Hourly Emission',
             style: TextStyle(
@@ -455,26 +538,23 @@ class _DailyChartDataState extends State<DailyChartData> {
   final List<int> indexes = [2, 4, 6];
   late List<FlSpot> spots;
   late List<LineChartBarData> lineChartBDlist;
-  late double A, B, C, mlg;
+  double A = 4, B = 5, C = 8;
+  double mlg = 18;
 
-  void setData() async {
-    double? valA = await SharedPref.getValA();
-    double? valB = await SharedPref.getValB();
-    double? valC = await SharedPref.getValC();
-    double? valMlg = await SharedPref.getMlg();
+  // void setData() async {
+  //   double? valMlg = await SharedPref.getMlg();
 
-    setState(() {
-      A = valA!;
-      B = valB!;
-      C = valC!;
-      mlg = valMlg!;
-    });
-  }
+  //   setState(() {
+  //     mlg = valMlg!;
+  //     mlg = 18;
+  //   });
+  // }
 
-  @override
-  void initState() {
-    setData();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   setData();
+  // }
 
   @override
   Widget build(BuildContext context) {

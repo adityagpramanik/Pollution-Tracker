@@ -86,4 +86,26 @@ class SharedPref {
     // ignore: await_only_futures
     return await prefs.getBool(logKey);
   }
+
+  static void showAll() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? name = prefs.getString(nameKey);
+    String? email = prefs.getString(emailKey);
+    String? type = prefs.getString(typeKey);
+    String? company = prefs.getString(compKey);
+    String? model = prefs.getString(modelKey);
+    double? mileage = prefs.getDouble(mlgKey);
+    bool? login = prefs.getBool(logKey);
+
+    print('''
+    name: $name
+    email: $email
+    type: $type
+    company: $company
+    model: $model
+    mileage: $mileage
+    login: $login
+    ''');
+  }
 }
